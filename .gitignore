@@ -1,0 +1,11 @@
+.DS_Store
+.vscode/
+
+
+.env
+
+# Docker related
+ollama/
+open-webui/
+
+
