@@ -26,7 +26,38 @@ services:
       - localnet
     restart: always
 
+  # Open Notebook用のデータベース
+  surrealdb:
+    image: surrealdb/surrealdb:v1.4.2
+    container_name: surrealdb
+    volumes:
+      - ./surrealdb/data:/mydata
+    command: start --user root --pass root file://mydata/database.db
+    networks:
+      - localnet
+    restart: unless-stopped
+
+  open_notebook:
+    image: lfnovo/open_notebook:v1-latest-single
+    ports:
+      - "8502:8502"
+      - "5055:5055"
+    environment:
+      # API Server connection
+      - API_URL=http://localhost:5055
+      # Database connection (required)
+      - SURREAL_URL=ws://localhost:8000/rpc
+      - SURREAL_USER=root
+      - SURREAL_PASSWORD=root
+      - SURREAL_NAMESPACE=open_notebook
+      - SURREAL_DATABASE=production
+
+      # Ollama接続設定
+      - OLLAMA_API_BASE=http://localhost:11434
+    volumes:
+      - ./notebook_data:/app/data
+      - ./surrealdb_data:/mydata
+      
 networks:
   localnet:
     driver: bridge
-
